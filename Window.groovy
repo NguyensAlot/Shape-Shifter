@@ -4,6 +4,7 @@
 
 
 import javax.swing.JFrame
+import javax.swing.JLabel
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.event.KeyEvent
@@ -17,6 +18,7 @@ class Window implements KeyListener {
     def _playing
     GameObject _p1, _p2
     JFrame _gameFrame
+    JLabel _score
     MainDraw _gameDraw
     List _obstacles
 
@@ -26,15 +28,15 @@ class Window implements KeyListener {
         _playing = true
 
         // some player objects (circles)
-        _p1 = new Player(_name: "player1", _color: Color.RED, _pos: [x: 10, y: _height-100], _move: _width/10)
+        _p1 = new Player(_name: "player1", _color: Color.RED, _pos: [x: _width/8*0+10, y: _height-100], _move: _width/10)
         _p2 = new Player(_name: "player2", _color: Color.BLUE, _pos: [x: _width/8*4+10, y: _height-100], _move: _width/10)
         _p1._shape = new Ellipse2D.Double(_p1?._pos?.x, _p1?._pos?.y, _p1._size, _p1._size)
         _p2._shape = new Ellipse2D.Double(_p2?._pos?.x, _p2?._pos?.y, _p2._size, _p2._size)
 
         // game obstacles (squares)
         _obstacles = new ArrayList<GameObject>()
-        _obstacles.add(new GameObject(_name: "block", _pos: [x: _width/8*0+10, y: 0]))
-        _obstacles.add(new GameObject(_name: "block2", _pos: [x: _width/8*4+10, y: 100]))
+        _obstacles.add(new GameObject(_name: "block", _pos: [x: _width/8*0+10, y: 0], _index: _obstacles.size()))
+        _obstacles.add(new GameObject(_name: "block2", _pos: [x: _width/8*4+10, y: 100], _index: _obstacles.size()))
 
         // graphics handler
         _gameDraw = new MainDraw()
@@ -45,12 +47,16 @@ class Window implements KeyListener {
             _gameDraw._pMap.put(b._name, b)
         }
 
+        // score
+        _score = new JLabel(text: ticks.toString())
+
         // frame
         _gameFrame = new JFrame("Shape Shifter")
         _gameFrame.setSize(_width, _height)
         _gameFrame.setResizable(false)
         _gameFrame.setMinimumSize(new Dimension(800, 600));
         _gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
+        _gameFrame.add(_score)
         _gameFrame.getContentPane().add(_gameDraw)
         _gameFrame.addKeyListener(this)
         _gameFrame.setVisible(true)
@@ -59,11 +65,17 @@ class Window implements KeyListener {
     def Run() {
         while (_playing) {
             ticks++;
+            ArrayList toRemove = new ArrayList<GameObject>()
+            if (ticks % 750000 == 0 && _obstacles.size() < 20) CreateObstacle()
             if (ticks % 5000 == 0) {
                 _obstacles.each { b ->
                     b.MoveObstacle()
                     _gameDraw._pMap.put(b._name, b)
+                    if (b._pos.y > _height) toRemove.add(b)
                 }
+            }
+            if (toRemove.size() > 0) {
+                _obstacles.removeAll(toRemove)
             }
             _gameDraw.repaint()
         }
@@ -81,8 +93,7 @@ class Window implements KeyListener {
      */
     @Override
     void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode())
-        {
+        switch (e.getKeyCode()) {
             case KeyEvent.VK_A:
                 if (_p1._pos.x - (int)_p1._move > 0) {
                     _p1.MoveLeft()
@@ -111,6 +122,17 @@ class Window implements KeyListener {
         _gameDraw.repaint()
     }
 
+    def CreateObstacle() {
+        Random r = new Random()
+        def col = r.nextInt(5)
+        def col2 = r.nextInt(5) + 5
+        _obstacles.add(new GameObject(_name: "block"+ticks, _pos: [x: _width/10*col+10, y: 0], _index: _obstacles.size()))
+        _obstacles.add(new GameObject(_name: "block"+ticks+1, _pos: [x: _width/10*col2+10, y: 0], _index: _obstacles.size()))
+    }
 
+    boolean Collision(player, obstacle) {
+        if (player._pos.y)
+        return false;
+    }
 }
 

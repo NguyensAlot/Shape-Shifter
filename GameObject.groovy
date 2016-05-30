@@ -13,7 +13,7 @@ class GameObject {
     protected Color _color
     protected def _pos = [x: 0, y: 0]
     protected def _size = 50
-    def maxHeight = 800
+    def _index = 0
 
     GameObject() {
         _color = Color.BLACK
@@ -21,7 +21,7 @@ class GameObject {
     }
 
     def MoveObstacle() {
-        _pos.y = _pos.y + 1 < maxHeight? _pos.y+1 : 0
+        _pos.y++
         _shape = new Rectangle((int)_pos?.x, (int)_pos?.y, _size, _size)
     }
 }
