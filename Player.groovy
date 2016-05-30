@@ -3,18 +3,18 @@
  */
 
 
-import java.awt.Color
-import java.awt.Shape
 import java.awt.geom.Ellipse2D
 
 public class Player extends GameObject{
-    String _name
-    Shape _shape
-    Color _color
-    def _pos = []
-    def _size = 50, _move = 80
+    def _move = 80
 
-    Player() {
+    def MoveLeft() {
+        _pos.x -= _move
+        _shape = new Ellipse2D.Double(_pos?.x, _pos?.y, _size, _size)
+    }
 
+    def MoveRight() {
+        _pos.x += _move
+        _shape = new Ellipse2D.Double(_pos?.x, _pos?.y, _size, _size)
     }
 }

@@ -4,32 +4,48 @@
 
 
 import javax.swing.JFrame
+import java.awt.Color
 import java.awt.Dimension
-import java.awt.Shape
 import java.awt.event.KeyEvent
 import java.awt.event.KeyListener
 import java.awt.geom.Ellipse2D
+import java.awt.geom.Line2D
 
 
 class Window implements KeyListener {
-    def _width = 800, _height = 600, ticks = 0, _move = 80
-    def _loc = [p1_x: _width/8, p2_x: _width/8*4]
+    def _width = 800, _height = 600, ticks = 0
     def _playing
-    Shape _p1, _p2
+    GameObject _p1, _p2
     JFrame _gameFrame
     MainDraw _gameDraw
+    List _obstacles
+
 
     Window() {
+        // flag if game lost
         _playing = true
 
-        _p1 = new Ellipse2D.Double(_loc.p1_x, _height-100, 50,50)
-        _p2 = new Ellipse2D.Double(_loc.p2_x, _height-100, 50,50)
+        // some player objects (circles)
+        _p1 = new Player(_name: "player1", _color: Color.RED, _pos: [x: 10, y: _height-100], _move: _width/10)
+        _p2 = new Player(_name: "player2", _color: Color.BLUE, _pos: [x: _width/8*4+10, y: _height-100], _move: _width/10)
+        _p1._shape = new Ellipse2D.Double(_p1?._pos?.x, _p1?._pos?.y, _p1._size, _p1._size)
+        _p2._shape = new Ellipse2D.Double(_p2?._pos?.x, _p2?._pos?.y, _p2._size, _p2._size)
 
+        // game obstacles (squares)
+        _obstacles = new ArrayList<GameObject>()
+        _obstacles.add(new GameObject(_name: "block", _pos: [x: _width/8*0+10, y: 0]))
+        _obstacles.add(new GameObject(_name: "block2", _pos: [x: _width/8*4+10, y: 100]))
+
+        // graphics handler
         _gameDraw = new MainDraw()
-        _gameDraw._pMap = new HashMap<String, Shape>()
-        _gameDraw._pMap.put("player1", _p1)
-        _gameDraw._pMap.put("player2", _p2)
+        _gameDraw._pMap.put(_p1._name, _p1)
+        _gameDraw._pMap.put(_p2._name, _p2)
+        _gameDraw._pMap.put("middleLine", new GameObject(_shape: new Line2D.Double(_width/2-5, 0, _width/2-5, _height)))
+        _obstacles.each { b ->
+            _gameDraw._pMap.put(b._name, b)
+        }
 
+        // frame
         _gameFrame = new JFrame("Shape Shifter")
         _gameFrame.setSize(_width, _height)
         _gameFrame.setResizable(false)
@@ -40,25 +56,22 @@ class Window implements KeyListener {
         _gameFrame.setVisible(true)
     }
 
-//    @Override
-//    public void actionPerformed(ActionEvent arg0) {
-//        _gameDraw.repaint()
-//        ticks++
-//    }
-
     def Run() {
         while (_playing) {
-            ticks++
-
+            ticks++;
+            if (ticks % 5000 == 0) {
+                _obstacles.each { b ->
+                    b.MoveObstacle()
+                    _gameDraw._pMap.put(b._name, b)
+                }
+            }
+            _gameDraw.repaint()
         }
     }
-    /**
-     * Invoked when a key has been typed.
-     * See the class description for {@link KeyEvent} for a definition of
-     * a key typed event.
-     */
-    @Override
+
     void keyTyped(KeyEvent e) {
+    }
+    void keyReleased(KeyEvent e) {
     }
 
     /**
@@ -71,41 +84,33 @@ class Window implements KeyListener {
         switch (e.getKeyCode())
         {
             case KeyEvent.VK_A:
-                _loc.p1_x -= _move
-                _p1 = CreatePlayer(_loc.p1_x)
-                _gameDraw._pMap.put("player1", _p1)
+                if (_p1._pos.x - (int)_p1._move > 0) {
+                    _p1.MoveLeft()
+                    _gameDraw._pMap.put(_p1._name, _p1)
+                }
                 break
             case KeyEvent.VK_D:
-                _loc.p1_x += _move
-                _p1 = CreatePlayer(_loc.p1_x)
-                _gameDraw._pMap.put("player1", _p1)
+                if (_p1._pos.x + (int)_p1._move < _width/2) {
+                    _p1.MoveRight()
+                    _gameDraw._pMap.put(_p1._name, _p1)
+                }
                 break
             case KeyEvent.VK_LEFT:
-                _loc.p2_x -= _move
-                _p2 = CreatePlayer(_loc.p2_x)
-                _gameDraw._pMap.put("player2", _p2)
+                if (_p2._pos.x - (int)_p2._move > _width/2) {
+                    _p2.MoveLeft()
+                    _gameDraw._pMap.put(_p2._name, _p2)
+                }
                 break
             case KeyEvent.VK_RIGHT:
-                _loc.p2_x += _move
-                _p2 = CreatePlayer(_loc.p2_x)
-                _gameDraw._pMap.put("player2", _p2)
+                if (_p2._pos.x + (int)_p2._move < _width) {
+                    _p2.MoveRight()
+                    _gameDraw._pMap.put(_p2._name, _p2)
+                }
                 break
         }
         _gameDraw.repaint()
     }
 
-    /**
-     * Invoked when a key has been released.
-     * See the class description for {@link KeyEvent} for a definition of
-     * a key released event.
-     */
-    @Override
-    void keyReleased(KeyEvent e) {
 
-    }
-
-    Shape CreatePlayer(def x) {
-        return new Ellipse2D.Double(x, _height-100, 50,50)
-    }
 }
 
