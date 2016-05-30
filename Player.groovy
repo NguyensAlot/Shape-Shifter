@@ -1,5 +1,6 @@
 /**
  * Created by Anthony on 5/19/2016.
+ * Description: This class handles the Player game object
  */
 
 

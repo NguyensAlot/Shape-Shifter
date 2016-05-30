@@ -1,5 +1,6 @@
 /**
  * Created by Anthony on 5/26/2016.
+ * Description: This class is the main graphics renderer which will draw all the shapes needed for the game
  */
 
 

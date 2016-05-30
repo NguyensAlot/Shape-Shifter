@@ -1,10 +1,10 @@
 /**
  * Created by Anthony on 5/16/2016.
+ * Description: This class will handle rendering of the window and game object interactions
  */
 
 
 import javax.swing.JFrame
-import javax.swing.JLabel
 import javax.swing.JOptionPane
 import java.awt.Color
 import java.awt.Dimension
@@ -13,7 +13,6 @@ import java.awt.event.KeyListener
 import java.awt.geom.Ellipse2D
 import java.awt.geom.Line2D
 
-
 class Window implements KeyListener {
     def _width = 800, _height = 600, ticks = 0, score = 0
     def _playing
@@ -21,7 +20,6 @@ class Window implements KeyListener {
     JFrame _gameFrame
     MainDraw _gameDraw
     List _obstacles
-
 
     Window() {
         // flag if game lost
@@ -35,8 +33,8 @@ class Window implements KeyListener {
 
         // game obstacles (squares)
         _obstacles = new ArrayList<GameObject>()
-        _obstacles.add(new GameObject(_name: "block", _pos: [x: _width/8*0+10, y: 0]))
-        _obstacles.add(new GameObject(_name: "block2", _pos: [x: _width/8*4+10, y: 100]))
+        _obstacles.add(new GameObject(_name: "block1", _pos: [x: _width/10*0+10, y: 0]))
+        _obstacles.add(new GameObject(_name: "block2", _pos: [x: _width/10*4+10, y: 100]))
 
         // graphics handler
         _gameDraw = new MainDraw()
@@ -58,6 +56,10 @@ class Window implements KeyListener {
         _gameFrame.setVisible(true)
     }
 
+    /**
+     * Main game loop, updates unit interactions
+     *
+     * */
     def Run() {
         while (_playing) {
             _obstacles.each { b ->
@@ -67,23 +69,35 @@ class Window implements KeyListener {
                     JOptionPane.showMessageDialog(null, "GAME OVER!\nYou dodged $score block(s) ")
                 }
             }
+            // increment ticks
             ticks++;
+            // create a 2nd array list for removing
             ArrayList toRemove = new ArrayList<GameObject>()
-            if (ticks % 75000 == 0 && _obstacles.size() < 20) CreateObstacle()
-            if (ticks % 500 == 0) {
+
+            // every 50000 ticks, create a new block
+            if (ticks % 30000 == 0 && _obstacles.size() < 20) {
+                CreateObstacle()
+            }
+
+            // every 250 ticks, move the block down by 1 pixel
+            if (ticks % 200 == 0) {
+                // use of closure with each loop
                 _obstacles.each { b ->
                     b.MoveObstacle()
+                    // put updated block back in map
                     _gameDraw._pMap.put(b._name, b)
+                    // if block is outside of window, add to list to remove and increment score
                     if (b._pos.y > _height) {
                         toRemove.add(b)
                         score++
                     }
-
                 }
             }
+            // remove blocks
             if (toRemove.size() > 0) {
                 _obstacles.removeAll(toRemove)
             }
+            // repaint
             _gameDraw.repaint()
         }
     }
@@ -94,9 +108,8 @@ class Window implements KeyListener {
     }
 
     /**
-     * Invoked when a key has been pressed.
-     * See the class description for {@link KeyEvent} for a definition of
-     * a key pressed event.
+     * Invoked when a key has been pressed. Will move the circle shapes when A-D or Left-Right is pressed
+     *
      */
     @Override
     void keyPressed(KeyEvent e) {
@@ -125,15 +138,12 @@ class Window implements KeyListener {
                     _gameDraw._pMap.put(_p2._name, _p2)
                 }
                 break
-            case KeyEvent.VK_SPACE:
-
-                break
         }
         _gameDraw.repaint()
     }
 
     /**
-     *
+     * Method will create 2 new GameObjects and add to list of obstacles for painting
      *
      * */
     def CreateObstacle() {
@@ -145,7 +155,7 @@ class Window implements KeyListener {
     }
 
     /**
-     *
+     * Simple collision detection algorithm between a player and obstacle.
      *
      * */
     boolean Collision(player, obstacle) {
@@ -157,4 +167,3 @@ class Window implements KeyListener {
         return false
     }
 }
-

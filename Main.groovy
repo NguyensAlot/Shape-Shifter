@@ -1,5 +1,6 @@
 /**
  * Created by Anthony on 5/26/2016.
+ * Description: Main method will start the game
  */
 
 
