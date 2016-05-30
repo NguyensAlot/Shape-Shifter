@@ -5,6 +5,7 @@
 
 import javax.swing.JFrame
 import javax.swing.JLabel
+import javax.swing.JOptionPane
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.event.KeyEvent
@@ -14,11 +15,10 @@ import java.awt.geom.Line2D
 
 
 class Window implements KeyListener {
-    def _width = 800, _height = 600, ticks = 0
+    def _width = 800, _height = 600, ticks = 0, score = 0
     def _playing
     GameObject _p1, _p2
     JFrame _gameFrame
-    JLabel _score
     MainDraw _gameDraw
     List _obstacles
 
@@ -35,8 +35,8 @@ class Window implements KeyListener {
 
         // game obstacles (squares)
         _obstacles = new ArrayList<GameObject>()
-        _obstacles.add(new GameObject(_name: "block", _pos: [x: _width/8*0+10, y: 0], _index: _obstacles.size()))
-        _obstacles.add(new GameObject(_name: "block2", _pos: [x: _width/8*4+10, y: 100], _index: _obstacles.size()))
+        _obstacles.add(new GameObject(_name: "block", _pos: [x: _width/8*0+10, y: 0]))
+        _obstacles.add(new GameObject(_name: "block2", _pos: [x: _width/8*4+10, y: 100]))
 
         // graphics handler
         _gameDraw = new MainDraw()
@@ -47,16 +47,12 @@ class Window implements KeyListener {
             _gameDraw._pMap.put(b._name, b)
         }
 
-        // score
-        _score = new JLabel(text: ticks.toString())
-
         // frame
         _gameFrame = new JFrame("Shape Shifter")
         _gameFrame.setSize(_width, _height)
         _gameFrame.setResizable(false)
         _gameFrame.setMinimumSize(new Dimension(800, 600));
         _gameFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE)
-        _gameFrame.add(_score)
         _gameFrame.getContentPane().add(_gameDraw)
         _gameFrame.addKeyListener(this)
         _gameFrame.setVisible(true)
@@ -64,14 +60,25 @@ class Window implements KeyListener {
 
     def Run() {
         while (_playing) {
+            _obstacles.each { b ->
+                if (Collision(_p1, b) || Collision(_p2, b)) {
+                    _playing = false
+                    _gameFrame.removeKeyListener(this)
+                    JOptionPane.showMessageDialog(null, "GAME OVER!\nYou dodged $score block(s) ")
+                }
+            }
             ticks++;
             ArrayList toRemove = new ArrayList<GameObject>()
-            if (ticks % 750000 == 0 && _obstacles.size() < 20) CreateObstacle()
-            if (ticks % 5000 == 0) {
+            if (ticks % 75000 == 0 && _obstacles.size() < 20) CreateObstacle()
+            if (ticks % 500 == 0) {
                 _obstacles.each { b ->
                     b.MoveObstacle()
                     _gameDraw._pMap.put(b._name, b)
-                    if (b._pos.y > _height) toRemove.add(b)
+                    if (b._pos.y > _height) {
+                        toRemove.add(b)
+                        score++
+                    }
+
                 }
             }
             if (toRemove.size() > 0) {
@@ -118,21 +125,36 @@ class Window implements KeyListener {
                     _gameDraw._pMap.put(_p2._name, _p2)
                 }
                 break
+            case KeyEvent.VK_SPACE:
+
+                break
         }
         _gameDraw.repaint()
     }
 
+    /**
+     *
+     *
+     * */
     def CreateObstacle() {
         Random r = new Random()
         def col = r.nextInt(5)
         def col2 = r.nextInt(5) + 5
-        _obstacles.add(new GameObject(_name: "block"+ticks, _pos: [x: _width/10*col+10, y: 0], _index: _obstacles.size()))
-        _obstacles.add(new GameObject(_name: "block"+ticks+1, _pos: [x: _width/10*col2+10, y: 0], _index: _obstacles.size()))
+        _obstacles.add(new GameObject(_name: "block"+ticks, _pos: [x: _width/10*col+10, y: 0]))
+        _obstacles.add(new GameObject(_name: "block"+ticks+1, _pos: [x: _width/10*col2+10, y: 0]))
     }
 
+    /**
+     *
+     *
+     * */
     boolean Collision(player, obstacle) {
-        if (player._pos.y)
-        return false;
+        def oY = obstacle?._pos?.y + obstacle?._size
+        if (player?._pos?.x == obstacle?._pos?.x &&
+                (player._pos.y - oY < 0 && player._pos.y - oY > -100)) {
+            return true
+        }
+        return false
     }
 }
 

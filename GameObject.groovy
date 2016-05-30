@@ -13,7 +13,6 @@ class GameObject {
     protected Color _color
     protected def _pos = [x: 0, y: 0]
     protected def _size = 50
-    def _index = 0
 
     GameObject() {
         _color = Color.BLACK
