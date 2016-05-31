@@ -46,7 +46,7 @@ class Window implements KeyListener {
         }
 
         // frame
-        _gameFrame = new JFrame("Shape Shifter")
+        _gameFrame = new JFrame("Raining Squares")
         _gameFrame.setSize(_width, _height)
         _gameFrame.setResizable(false)
         _gameFrame.setMinimumSize(new Dimension(800, 600));
@@ -54,10 +54,12 @@ class Window implements KeyListener {
         _gameFrame.getContentPane().add(_gameDraw)
         _gameFrame.addKeyListener(this)
         _gameFrame.setVisible(true)
+
+        JOptionPane.showMessageDialog(null, "Goal: Avoid the falling squares with both your characters\nDirections: A-D to move red unit, Left-Right to move blue unit")
     }
 
     /**
-     * Main game loop, updates unit interactions
+     * Main game loop, update unit interactions
      *
      * */
     def Run() {
@@ -74,12 +76,12 @@ class Window implements KeyListener {
             // create a 2nd array list for removing
             ArrayList toRemove = new ArrayList<GameObject>()
 
-            // every 50000 ticks, create a new block
+            // every 30000 ticks, create a new block
             if (ticks % 30000 == 0 && _obstacles.size() < 20) {
                 CreateObstacle()
             }
 
-            // every 250 ticks, move the block down by 1 pixel
+            // every 200 ticks, move the block down by 1 pixel
             if (ticks % 200 == 0) {
                 // use of closure with each loop
                 _obstacles.each { b ->
@@ -143,13 +145,16 @@ class Window implements KeyListener {
     }
 
     /**
-     * Method will create 2 new GameObjects and add to list of obstacles for painting
+     * Method will create 2 new GameObjects and add to list of obstacles for painting.
+     * I create 2 so that there's an equal amount on both sides of the window
      *
      * */
     def CreateObstacle() {
         Random r = new Random()
+        // pick a random column (out of 10)
         def col = r.nextInt(5)
         def col2 = r.nextInt(5) + 5
+        // add to list
         _obstacles.add(new GameObject(_name: "block"+ticks, _pos: [x: _width/10*col+10, y: 0]))
         _obstacles.add(new GameObject(_name: "block"+ticks+1, _pos: [x: _width/10*col2+10, y: 0]))
     }
@@ -159,9 +164,11 @@ class Window implements KeyListener {
      *
      * */
     boolean Collision(player, obstacle) {
+        // get the y-location for the obstacle
         def oY = obstacle?._pos?.y + obstacle?._size
+        // check if x-locations are equal and check if y-locations are touching
         if (player?._pos?.x == obstacle?._pos?.x &&
-                (player._pos.y - oY < 0 && player._pos.y - oY > -100)) {
+                (player._pos.y - oY < 0 && player._pos.y - oY > -(player._size + obstacle._size))) {
             return true
         }
         return false
