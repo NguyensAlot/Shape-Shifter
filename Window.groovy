@@ -131,12 +131,14 @@ class Window implements KeyListener {
                     _gameDraw._pMap.put(_p1._name, _p1)
                 }
                 break
+            case KeyEvent.VK_S:
             case KeyEvent.VK_LEFT:
                 if (_p2._pos.x - (int)_p2._move > _width/2) {
                     _p2.MoveLeft()
                     _gameDraw._pMap.put(_p2._name, _p2)
                 }
                 break
+            case KeyEvent.VK_W:
             case KeyEvent.VK_RIGHT:
                 if (_p2._pos.x + (int)_p2._move < _width) {
                     _p2.MoveRight()
@@ -166,14 +168,14 @@ class Window implements KeyListener {
      * Simple collision detection algorithm between a player and obstacle.
      *
      * */
-    boolean Collision(player, obstacle) {
+    def Collision(player, obstacle) {
         // get the y-location for the obstacle
         def oY = obstacle?._pos?.y + obstacle?._size
         // check if x-locations are equal and check if y-locations are touching
         if (player?._pos?.x == obstacle?._pos?.x &&
                 (player._pos.y - oY < 0 && player._pos.y - oY > -(player._size + obstacle._size))) {
-            true
+            return true
         }
-        false
+        return false
     }
 }
