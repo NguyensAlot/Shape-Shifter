@@ -117,8 +117,11 @@ class Window implements KeyListener {
     void keyPressed(KeyEvent e) {
         switch (e.getKeyCode()) {
             case KeyEvent.VK_A:
+                // check if movement will be in bounds
                 if (_p1._pos.x - (int)_p1._move > 0) {
+                    // update shape
                     _p1.MoveLeft()
+                    // put it back into map
                     _gameDraw._pMap.put(_p1._name, _p1)
                 }
                 break
@@ -169,8 +172,8 @@ class Window implements KeyListener {
         // check if x-locations are equal and check if y-locations are touching
         if (player?._pos?.x == obstacle?._pos?.x &&
                 (player._pos.y - oY < 0 && player._pos.y - oY > -(player._size + obstacle._size))) {
-            return true
+            true
         }
-        return false
+        false
     }
 }
